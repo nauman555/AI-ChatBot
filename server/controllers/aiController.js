@@ -6,13 +6,16 @@ import { getAiResponse } from "./tool_calling.js";
 const getAIResponse = async (req, res) => {
   try {
     const { message } = req.body;
+    const thread_id = req.body.thread_id; // Get thread_id from request body
 
-    if (!message) {
-      return res.status(400).json({ error: "Message is required" });
+    if (!message || !thread_id) {
+      return res
+        .status(400)
+        .json({ error: "Message and thread_id are required" });
     }
 
     // Get AI response using the getAiResponse function from tool_calling.js
-    const aiResponseData = await getAiResponse(message);
+    const aiResponseData = await getAiResponse(message, thread_id);
     if (!aiResponseData) {
       return res.status(500).json({ error: "Failed to get AI response" });
     }
@@ -31,9 +34,15 @@ const getAIResponse = async (req, res) => {
 
 const getChatHistory = async (req, res) => {
   try {
-    // Chat history retrieval (currently in-memory, can be extended with external storage)
-    const chatHistory = [];
-    res.json(chatHistory);
+    const thread_id = req.query.thread_id; // Get thread_id from query params
+
+    if (!thread_id) {
+      return res.status(400).json({ error: "thread_id is required" });
+    }
+
+    // Get chat history from cache for this thread
+    const chatHistory = messageCache.get(thread_id) || [];
+    res.json({ thread_id, messages: chatHistory });
   } catch (error) {
     res.status(500).json({ error: "Internal server error" });
   }

@@ -6,7 +6,7 @@ const router = express.Router();
 // POST /api/ai/chat - Send message and get AI response
 router.post("/chat", getAIResponse);
 
-// GET /api/ai/history - Get chat history
+// GET /api/ai/history?thread_id=xxx - Get chat history for a specific thread
 router.get("/history", getChatHistory);
 
 export default router;

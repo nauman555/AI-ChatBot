@@ -13,6 +13,7 @@ const InputTextAreaC = ({
     <div className="p-4 bg-gray-900">
       <div className="max-w-4xl mx-auto relative">
         <textarea
+          autoFocus
           placeholder="Ask AI anything ...."
           value={userInput}
           disabled={loading}

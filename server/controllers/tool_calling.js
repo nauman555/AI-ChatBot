@@ -1,5 +1,6 @@
 import dotenv from "dotenv";
 import { tavily } from "@tavily/core";
+import NodeCache from "node-cache";
 
 dotenv.config();
 
@@ -9,8 +10,16 @@ const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY,
 });
 
-export async function getAiResponse(userQuestion) {
-  const messagesArray = [
+// Create cache at module level so it persists across all API calls
+const messageCache = new NodeCache({ stdTTL: 3600 * 24 }); // Cache messages for 24 hours
+
+// Function to get AI response based on user question. thread ID is used to cache the conversation history for each thread.
+//  thread id updated in frontend and sent in each request to backend, so that we can maintain the conversation history for each thread separately.
+
+export async function getAiResponse(userQuestion, thread_id) {
+  console.log("thread_id in getAiResponse:", thread_id);
+
+  const initial_messagesArray = [
     {
       role: "system",
       // here we instruct the LLM to use the tool if it has no latest information
@@ -38,6 +47,8 @@ export async function getAiResponse(userQuestion) {
     },
   ];
 
+  // get the messages array from cache if present, otherwise use the initial_messagesArray
+  const messagesArray = messageCache.get(thread_id) || initial_messagesArray;
   // push the user input into messagesArray for further processing
   messagesArray.push({ role: "user", content: userQuestion });
 
@@ -81,6 +92,7 @@ export async function getAiResponse(userQuestion) {
 
     // if tool calls are not present, return the AI assitant response and exit
     if (!toolCalls) {
+      messageCache.set(thread_id, messagesArray); // Cache the messages array for the thread_id
       return groq_response.choices[0].message.content;
     }
 
@@ -105,6 +117,8 @@ export async function getAiResponse(userQuestion) {
     }
   }
 }
+
+// This is the implementation of the tool that will be called by the LLM when it needs to get the latest information from the internet.
 
 const tool_calling = async ({ query }) => {
   console.log("Searching on Web...");

@@ -1,11 +1,13 @@
 import React from "react";
 import { useState, useRef } from "react";
+import { useEffect } from "react";
 import ChatBotIntro from "./Components/chatBotIntro";
 import AIresponseC from "./Components/AIresponseC";
 import InputTextAreaC from "./Components/InputTextAreaC";
 
 const API_BASE_URL =
   import.meta.env.VITE_API_URL || "http://localhost:5000/api";
+const threadID = crypto.randomUUID().substring(0, 10); // Generate a unique thread ID for each chat session
 
 function App() {
   const [userInput, setUserInput] = useState("");
@@ -13,8 +15,12 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
   const [isThinking, setIsThinking] = useState(false);
-
   const textareaRef = useRef(null);
+  const chatEndRef = useRef(null);
+
+  useEffect(() => {
+    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   const autoResize = (el) => {
     el.style.height = "auto";
@@ -56,7 +62,7 @@ function App() {
       headers: {
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ message: userInput }),
+      body: JSON.stringify({ thread_id: threadID, message: userInput }),
     });
     if (AiCallResponse.ok) {
       const data = await AiCallResponse.json();
@@ -81,7 +87,11 @@ function App() {
         <div className="max-w-4xl mx-auto w-full space-y-4">
           <ChatBotIntro showintro={showIntro} />
 
-          <AIresponseC messages={messages} isThinking={isThinking} />
+          <AIresponseC
+            messages={messages}
+            isThinking={isThinking}
+            chatEndRef={chatEndRef}
+          />
         </div>
       </div>
 
