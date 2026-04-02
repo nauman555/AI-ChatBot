@@ -17,7 +17,7 @@ This is a chatbot web application where you can:
 
 ```bash
 # Copy the project to your computer
-git clone <repo-url>
+git clone https://github.com/nauman555/AI-ChatBot.git
 
 # Go into the project folder
 cd AI-CHATBOT
@@ -65,8 +65,6 @@ npm install
 # GROQ_API_KEY=your_groq_api_key_here
 # TVLY_API_KEY=your_tavily_api_key_here
 ```
-
-⚠️ **Important:** Never share your API keys! Keep them private!
 
 ## How to Run
 
