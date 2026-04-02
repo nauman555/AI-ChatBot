@@ -1,6 +1,6 @@
 import React from "react";
 
-function AIresponseC({ messages }) {
+function AIresponseC({ messages, isThinking }) {
   return (
     <div id="messages Div">
       {messages.map((msg, index) => (
@@ -11,7 +11,7 @@ function AIresponseC({ messages }) {
           }`}
         >
           <div
-            className={`px-4 py-3 rounded-xl max-w-2xl break-words ${
+            className={`px-4 py-3 my-3 rounded-xl max-w-2xl break-words ${
               msg.role === "user" ? "bg-gray-500" : "bg-gray-800"
             }`}
           >
@@ -19,6 +19,13 @@ function AIresponseC({ messages }) {
           </div>
         </div>
       ))}
+      {isThinking && (
+        <div className="flex justify-start">
+          <div className="px-4 py-3 rounded-xl max-w-2xl bg-gray-800 text-gray-300 italic">
+            Thinking<span className="animate-pulse">...</span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

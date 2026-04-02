@@ -12,6 +12,7 @@ function App() {
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [showIntro, setShowIntro] = useState(true);
+  const [isThinking, setIsThinking] = useState(false);
 
   const textareaRef = useRef(null);
 
@@ -46,6 +47,7 @@ function App() {
     reSizeTextArea();
     setLoading(true);
     setShowIntro(false);
+    setIsThinking(true);
 
     //call backend API to get AI response
 
@@ -64,6 +66,7 @@ function App() {
       };
       setMessages((prevMessages) => [...prevMessages, aiMsg]);
       setLoading(false);
+      setIsThinking(false);
     }
   };
 
@@ -77,7 +80,8 @@ function App() {
       >
         <div className="max-w-4xl mx-auto w-full space-y-4">
           <ChatBotIntro showintro={showIntro} />
-          <AIresponseC messages={messages} />
+
+          <AIresponseC messages={messages} isThinking={isThinking} />
         </div>
       </div>
 
