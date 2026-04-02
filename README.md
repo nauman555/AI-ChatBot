@@ -104,13 +104,15 @@ That's it! You can now chat with the AI. 🎉
 ## How It Works
 
 1. **You type a message** → Click "Ask" or press Enter
-2. **Frontend sends to backend** → Message goes to http://localhost:5000/api/ai/chat
-3. **Backend processes it** → Uses **Groq AI (LLama 3.3 70B model)** to understand your question
-4. **Tool Calling with Tavily** → Groq decides if it needs more information and calls **Tavily API** for web search
-5. **Tavily searches the web** → Gets real-time information from the internet
-6. **AI generates response** → Combines its knowledge with latest web search results
-7. **Response comes back** → Displayed in the chat
-8. **You see the answer** → On your screen
+2. **Frontend sends to backend** → Message goes to http://localhost:5000/api/ai/chat with a unique **Thread ID**
+3. **Backend stores messages** → Uses **Node Cache** to store conversation history for each thread
+4. **Backend processes it** → Uses **Groq AI (LLama 3.3 70B model)** to understand your question
+5. **Tool Calling with Tavily** → Groq decides if it needs more information and calls **Tavily API** for web search
+6. **Tavily searches the web** → Gets real-time information from the internet
+7. **AI generates response** → Combines its knowledge with latest web search results
+8. **Chat history saved** → All messages are saved in cache for your thread ID
+9. **Response comes back** → Displayed in the chat
+10. **You see the answer** → On your screen
 
 ### What is Groq?
 
@@ -128,6 +130,17 @@ That's it! You can now chat with the AI. 🎉
 - Provide up-to-date answers
 - Act as a "tool" that AI uses when needed
 - Help AI answer questions that need current information
+
+### What is Thread ID and Chat History?
+
+**Thread ID** is a unique identifier for each chat session:
+
+- **Unique Per Chat Session** - Each time you open the app, a new Thread ID is created
+- **Thread ID changes only on page reload** - The same Thread ID is used for all messages in one chat session
+- **Conversation History** - All your messages and AI responses are stored together using the Thread ID
+- **Node Cache** - The backend uses Node Cache to store conversation history for 24 hours per thread
+- **Maintains Context** - The AI remembers previous messages in the same thread for better context
+- **Multiple Threads** - Each browser tab/window has its own separate conversation history
 
 ## Folder Structure
 
@@ -167,13 +180,55 @@ AI-CHATBOT/
 ### Routes (`server/routes/aiRoutes.js`)
 
 - Defines API endpoints
-- `/api/ai/chat` - Send a message to the AI
+- `/api/ai/chat` - Send a message to the AI (with thread ID for history)
+- `/api/ai/history` - Get chat history for a specific thread
 
 ### Controllers
 
 - Contains the logic to call the AI service
 - Processes the response
 - Sends it back to frontend
+
+## API Endpoints
+
+### Send a Chat Message
+
+**Endpoint:** `POST /api/ai/chat`
+
+**Request:**
+```json
+{
+  "thread_id": "abc1234567",
+  "message": "What is the capital of France?"
+}
+```
+
+**Response:**
+```json
+{
+  "reply": "The capital of France is Paris."
+}
+```
+
+**How it works:**
+- The same `thread_id` is sent with every message
+- Backend retrieves previous messages from cache for that thread
+- AI understands the conversation context
+- New message and response are added to the cache
+
+### Get Chat History
+
+**Endpoint:** `GET /api/ai/history?thread_id=abc1234567`
+
+**Response:**
+```json
+[
+  { "role": "user", "content": "What is the capital of France?" },
+  { "role": "assistant", "content": "The capital of France is Paris." }
+]
+```
+
+**Note:** Chat history is stored for **24 hours** per thread, then automatically deleted.
 
 ## Technology Used
 
@@ -184,6 +239,7 @@ AI-CHATBOT/
 - **Node.js** - JavaScript runtime
 - **Groq AI** - Powerful language model for intelligent responses
 - **Tavily API** - Tool calling service (web search for latest information)
+- **Node Cache** - In-memory cache to store conversation history per thread for 24 hours
 - **dotenv** - Manages secret keys safely
 
 ## Deploy to Internet

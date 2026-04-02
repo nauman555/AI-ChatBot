@@ -36,12 +36,3 @@ server/
 ## API Endpoints
 
 - `POST /api/ai/chat` - Send message and get AI response
-- `GET /api/ai/history` - Get chat history
-- `GET /api/health` - Health check
-
-## Notes
-
-- MongoDB connection string is configurable via `.env`
-- CORS is enabled for frontend communication
-- Error handling middleware is in place
-- Ready for integration with AI services (OpenAI, Hugging Face, etc.)
