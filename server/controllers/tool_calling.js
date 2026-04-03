@@ -52,8 +52,16 @@ export async function getAiResponse(userQuestion, thread_id) {
   // push the user input into messagesArray for further processing
   messagesArray.push({ role: "user", content: userQuestion });
 
+  const MAX_TOOL_CALLS = 10;
+  let toolCallCount = 0;
+
   // run the code in loop until the tool calls are not present a
   while (true) {
+
+    // if tool call count is greater than max tool calls, return the response
+    if (toolCallCount > MAX_TOOL_CALLS) {
+      return "Unable to fetch the information. Please try again later.";
+    }
     const groq_response = await groq.chat.completions.create({
       model: "llama-3.3-70b-versatile",
       temperature: 0,
